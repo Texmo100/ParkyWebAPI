@@ -16,6 +16,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using ParkyAPI.ParkyMapper;
+using System.Reflection;
+using System.IO;
 
 namespace ParkyAPI
 {
@@ -36,6 +38,31 @@ namespace ParkyAPI
 
             services.AddScoped<INationalParkRepository, NationalParkRepository>();
             services.AddAutoMapper(typeof(ParkyMappings));
+            services.AddSwaggerGen(options => {
+                options.SwaggerDoc("ParkyOpenAPISpec",
+                    new Microsoft.OpenApi.Models.OpenApiInfo()
+                    {
+                        Title = "Parky API",
+                        Version = "1",
+                        Description = "Udemy Parky API",
+                        Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                        {
+                            Email = "ir.isaac1000@gmail.com",
+                            Name = "Isaac Iniguez",
+                            //Url = new Uri("caca")
+
+                        },
+                        License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                        {
+                            Name = "MIT License",
+                            Url = new Uri("https://en.wikipedia.org/wiki/MIT License")
+                        }
+
+                    });
+                var xmlCommentFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var cmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommentFile);
+                options.IncludeXmlComments(cmlCommentsFullPath);
+            });
             services.AddControllers();
         }
 
@@ -48,6 +75,12 @@ namespace ParkyAPI
             }
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(options => {
+                options.SwaggerEndpoint("swagger/ParkyOpenAPISpec/swagger.json", "Parky API");
+                options.RoutePrefix = "";
+            });
 
             app.UseRouting();
 
