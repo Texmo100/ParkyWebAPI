@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 
 namespace ParkyAPI.Controllers
 {
-    [Route("api/Trails")]
+    //[Route("api/Trails")]
+    [Route("api/v{version:apiVersion}/trails")]
     [ApiController]
+    //[ApiExplorerSettings(GroupName = "ParkyOpenAPISpecTrails")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public class TrailsController : Controller
     {
@@ -66,6 +68,29 @@ namespace ParkyAPI.Controllers
             return Ok(objDto);
         }
 
+        [HttpGet("[action]/{nationalParkId:int}")]
+        [ProducesResponseType(200, Type = typeof(TrailDto))]
+        [ProducesResponseType(404)]
+        [ProducesDefaultResponseType]
+        public IActionResult GetTrailInNationalPark(int nationalParkId)
+        {
+            var objList = _trailRepo.GetTrailsInNationalPark(nationalParkId);
+
+            if (objList == null)
+            {
+                return NotFound();
+            }
+
+            var objDto = new List<TrailDto>();
+
+            foreach (var obj in objList)
+            {
+                objDto.Add(_mapper.Map<TrailDto>(obj));
+            }
+
+            return Ok(objDto);
+        }
+
         [HttpPost]
         [ProducesResponseType(201, Type = typeof(TrailDto))]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -88,7 +113,7 @@ namespace ParkyAPI.Controllers
 
             if (!_trailRepo.CreateTrail(trailObj))
             {
-                ModelState.AddModelError("", $"Something went wrong when savind the record {trailObj.Name}");
+                ModelState.AddModelError("", $"Something went wrong when saving the record {trailObj.Name}");
                 return StatusCode(500, ModelState);
             }
 

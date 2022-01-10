@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 
 namespace ParkyAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v{version:apiVersion}/nationalparks")]
+    //[Route("api/[controller]")]
     [ApiController]
+    //[ApiExplorerSettings(GroupName = "ParkyOpenAPISpecNP")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public class NationalParksController : Controller
     {
@@ -97,11 +99,12 @@ namespace ParkyAPI.Controllers
 
             if (!_npRepo.CreateNationalPark(nationalParkObj))
             {
-                ModelState.AddModelError("", $"Something went wrong when savind the record {nationalParkObj.Name}");
+                ModelState.AddModelError("", $"Something went wrong when saving the record {nationalParkObj.Name}");
                 return StatusCode(500, ModelState);
             }
 
-            return CreatedAtRoute("GetNationalPark", new { nationalParkId = nationalParkObj.Id}, nationalParkObj);
+            return CreatedAtRoute("GetNationalPark", new { version = HttpContext.GetRequestedApiVersion().ToString(),
+                nationalParkId = nationalParkObj.Id}, nationalParkObj);
         }
 
         [HttpPatch("{nationalParkId:int}", Name = "UpdateNationalPark")]
